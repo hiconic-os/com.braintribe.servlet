@@ -109,5 +109,9 @@ public class FakeServletResponse implements ServletResponse {
 	public void setLocale(Locale arg0) {
 		//Intentionally left empty
 	}
+	@Override
+	public void setContentLengthLong(long len) {
+		//Intentionally left empty
+	}
 
 }

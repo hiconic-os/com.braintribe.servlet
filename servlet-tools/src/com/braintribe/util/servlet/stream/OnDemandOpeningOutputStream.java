@@ -12,27 +12,28 @@
 package com.braintribe.util.servlet.stream;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
+import javax.servlet.WriteListener;
 
 /**
- * This is a wrapper around the OutputStream provided by a ServletReponse (and a HttpServletReponse)
- * which waits to open the output stream until the first byte is actually about to be written.
- * This prevents the output stream to be opened too early, thus preventing the ExceptionFilter
- * to send an exception to the client.
+ * This is a wrapper around the OutputStream provided by a ServletReponse (and a HttpServletReponse) which waits to open the output stream until the
+ * first byte is actually about to be written. This prevents the output stream to be opened too early, thus preventing the ExceptionFilter to send an
+ * exception to the client.
  */
 public class OnDemandOpeningOutputStream extends ServletOutputStream {
 
-	private ServletResponse response;
+	private final ServletResponse response;
 	private ServletOutputStream delegate;
 
 	public OnDemandOpeningOutputStream(ServletResponse response) {
 		this.response = response;
 	}
-	
+
 	// OutputStream methods
-	
+
 	@Override
 	public void write(int b) throws IOException {
 		if (delegate == null) {
@@ -40,7 +41,7 @@ public class OnDemandOpeningOutputStream extends ServletOutputStream {
 		}
 		delegate.write(b);
 	}
-	
+
 	@Override
 	public void write(byte b[], int off, int len) throws IOException {
 		if (delegate == null) {
@@ -80,7 +81,7 @@ public class OnDemandOpeningOutputStream extends ServletOutputStream {
 	}
 
 	// ServletOutputStream methods
-	
+
 	@Override
 	public void print(boolean arg0) throws IOException {
 		if (delegate == null) {
@@ -200,4 +201,29 @@ public class OnDemandOpeningOutputStream extends ServletOutputStream {
 		}
 		delegate.println(s);
 	}
+
+	@Override
+	public boolean isReady() {
+		if (delegate == null) {
+			delegate = getResponseOutputStreamSafeUnchecked();
+		}
+		return delegate.isReady();
+	}
+
+	@Override
+	public void setWriteListener(WriteListener writeListener) {
+		if (delegate == null) {
+			delegate = getResponseOutputStreamSafeUnchecked();
+		}
+		delegate.setWriteListener(writeListener);
+	}
+
+	private ServletOutputStream getResponseOutputStreamSafeUnchecked() {
+		try {
+			return response.getOutputStream();
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
 }

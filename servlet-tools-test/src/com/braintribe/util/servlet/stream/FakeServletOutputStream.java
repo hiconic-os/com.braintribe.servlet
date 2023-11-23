@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 
 public class FakeServletOutputStream extends ServletOutputStream {
 
@@ -54,4 +55,15 @@ public class FakeServletOutputStream extends ServletOutputStream {
 		this.isClosed = true;
 		baos.close();
 	}
+
+	@Override
+	public boolean isReady() {
+		return true;
+	}
+
+	@Override
+	public void setWriteListener(WriteListener writeListener) {
+		// ignore
+	}
+
 }
