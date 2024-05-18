@@ -21,6 +21,7 @@ You should have received a copy of the GNU Lesser General Public License along w
         <V.com.braintribe.htmltools>[2.0,2.1)</V.com.braintribe.htmltools>
         <V.com.braintribe.testing>[2.0,2.1)</V.com.braintribe.testing>
         <V.javax.servlet>3.1.0</V.javax.servlet>
+        <V.jakarta.servlet>6.0.0</V.jakarta.servlet>
     </properties>
     <licenses>
         <license>

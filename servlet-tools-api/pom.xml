@@ -28,11 +28,20 @@ You should have received a copy of the GNU Lesser General Public License along w
     </licenses>
     <dependencies>
         <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>${V.jakarta.servlet}</version>
+            <scope>provided</scope>
+        </dependency>
+
+		<!-- Deprecated -->
+        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
             <version>${V.javax.servlet}</version>
+            <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>com.braintribe.common</groupId>
             <artifactId>common-api</artifactId>
