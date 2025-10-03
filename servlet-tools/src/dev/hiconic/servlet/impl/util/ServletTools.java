@@ -26,6 +26,7 @@ import java.util.TreeMap;
 import com.braintribe.logging.Logger;
 import com.braintribe.utils.StringTools;
 import com.braintribe.utils.html.HtmlTools;
+import com.braintribe.utils.lcd.NullSafe;
 
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.Cookie;
@@ -157,6 +158,62 @@ public class ServletTools {
 	}
 
 	/**
+	 * <b>URL</b>: http://foo.bar/services/x/y/z<br>
+	 * <b>contextPath</b>: /services<br>
+	 * <b>servlet path</b>: /x/y<br>
+	 * <b>Result</b>: http://foo.bar/services
+	 */
+	public static String getServletContextUrlProxyAware(HttpServletRequest request) {
+		return getServerUrlProxyAware(request) + getServletContextPathProxyAware(request);
+	}
+
+	private static String getServletContextPathProxyAware(HttpServletRequest request) {
+		String path = request.getHeader("X-Forwarded-Prefix");
+		if (path != null && !path.isEmpty())
+			return path;
+		else
+			return request.getContextPath();
+	}
+
+	/**
+	 * <b>URL</b>: http://foo.bar/services/x/y/z<br>
+	 * <b>contextPath</b>: /services<br>
+	 * <b>servlet path</b>: /x/y<br>
+	 * <b>Result</b>: http://foo.bar
+	 */
+	 public static String getServerUrlProxyAware(HttpServletRequest request) {
+			String scheme = request.getHeader("X-Forwarded-Proto");
+			if (scheme == null || scheme.isEmpty()) {
+				scheme = request.getScheme();
+			}
+
+			String host = request.getHeader("X-Forwarded-Host");
+			String port = null;
+			if (host != null && host.contains(":")) {
+				String[] parts = host.split(":", 2);
+				host = parts[0];
+				port = parts[1];
+			}
+			if (host == null || host.isEmpty()) {
+				host = request.getServerName();
+			}
+
+			if (port == null) {
+				port = request.getHeader("X-Forwarded-Port");
+			}
+			if (port == null || port.isEmpty()) {
+				int p = request.getServerPort();
+				port = String.valueOf(p);
+			}
+
+			// Hide default ports
+			boolean defaultPort = ("http".equalsIgnoreCase(scheme) && "80".equals(port)) || //
+					("https".equalsIgnoreCase(scheme) && "443".equals(port));
+
+			return scheme + "://" + host + (defaultPort ? "" : ":" + port);
+	 }
+
+	/**
 	 * Returns a single parameter value of the request. If the request does not contain this parameter, the default value will be returned.
 	 * 
 	 * @param request
@@ -170,12 +227,9 @@ public class ServletTools {
 	 *             Thrown when either request or key is null.
 	 */
 	public static String getSingleParameter(HttpServletRequest request, String key, String defaultValue) {
-		if (request == null) {
-			throw new IllegalArgumentException("The request must not be nul.");
-		}
-		if (key == null) {
-			throw new IllegalArgumentException("The key must not be nul.");
-		}
+		NullSafe.nonNull(request, "request");
+		NullSafe.nonNull(key, "key");
+
 		String parameterValue = request.getParameter(key);
 		if (parameterValue == null) {
 			return defaultValue;
